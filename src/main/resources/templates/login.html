@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!-- Head -->
+<th:block th:replace="~{common/template :: common-head(title='Home')}"/>
+
+
+<head>
+    <title>Login</title>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2>Login</h2>
+    <form action="/auth/login" method="post">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" class   ="form-control" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+        <a href="/auth/register"  class="ml-auto btn btn-primary">Or Sign Up!</a>
+
+    </form>
+
+</div>
+
+<div th:replace="~{common/template :: common-scripts}"></div>
+</body>
+</html>

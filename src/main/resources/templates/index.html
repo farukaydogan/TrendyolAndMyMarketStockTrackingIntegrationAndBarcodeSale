@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <!-- Head -->
+    <th:block th:replace="~{common/template :: common-head(title='Home')}"/>
+</head>
+
+<nav class="mb-5" th:insert="common/template :: navbar">
+    <!-- Navbar content from fragments will be inserted here -->
+</nav>
+
+<body>
+
+<div class="container-fluid ">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-12">
+            <div class="card card-registration card-registration-2" style="border-radius: 15px;">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <div class="col-lg-8">
+                            <div class="d-flex justify-content-between align-items-center mb-5">
+                                <h1 class="fw-bold mb-0 text-black">Shopping Cart</h1>
+                            </div>
+
+
+                            <div class="row p-5 pb-0 pb0 justify-content-between  d-flex">
+                                <div class="col-md-2 col-lg-2 col-xl-2">
+                                    <h6 class="text-black mb-0">Ürün Fotografi</h6>
+                                </div>
+                                <div class="col-md-3 col-lg-3 col-xl-3">
+                                    <h6 class="text-black mb-0">Ürün Adı</h6>
+                                </div>
+                                <div class="col-md-3 col-lg-3 col-xl-3 d-flex">
+                                    <h6 class="text-black mb-0">Miktar</h6>
+                                </div>
+                                <div class="col-md-2 col-lg-2 col-xl-2 offset-lg-1">
+                                    <h6 class="text-black mb-0">Fiyat</h6>
+                                </div>
+                                <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                                    <h6 class="text-black mb-0">Kaldır</h6>
+                                </div>
+                            </div>
+                            <!--                            <hr class="my-1">-->
+
+                            <div id="cart" class="p-5 pb-0 pt-0">
+
+                                <!--                                        urunler buraya siralanactir asagidaki gibi gorunecektir-->
+
+                            </div>
+                        </div>
+                        <div class="col-lg-4 bg-grey">
+                            <div class="p-5">
+                                <h3 class="fw-bold mb-5 mt-2 pt-1">Summary</h3>
+                                <hr class="my-4">
+
+                                <div class="d-flex justify-content-between mb-5">
+                                    <h3 class="total-price">Toplam fiyat</h3>
+                                    <h5></h5>
+                                </div>
+                                <button type="button" class="btn btn-success btn-lg btn-block w-100"
+                                        data-mdb-ripple-color="dark" onclick="placeOrder()">SEPETİ ONAYLA
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var jsonString = /*[[${products}]]*/ [];
+    let products = JSON.parse(jsonString);
+    console.log(products);
+    /*]]>*/
+</script>
+
+<script>
+
+    let accumulatedKeys = "";
+    let lastKeypressTime = 0;
+    let cart = [];
+
+    document.addEventListener('DOMContentLoaded', function () {
+        let exampleBarcode = "LK1589574954876";
+        let productToAdd = products.find(product => product.barcode === exampleBarcode);
+
+        if (productToAdd) {
+            let existingCartItem = cart.find(cartItem => cartItem.product.barcode === exampleBarcode);
+            if (existingCartItem) {
+                existingCartItem.quantity += 1;
+            } else {
+                cart.push({product: productToAdd, quantity: 1});
+            }
+            console.log('Current cart:', cart);
+
+            // Update the cart view
+            updateCartView();
+        } else {
+            console.log('Example product not found for barcode:', exampleBarcode);
+        }
+
+        let exampleBarcode2 = "GS488444852";
+        let productToAdd2 = products.find(product => product.barcode === exampleBarcode2);
+
+        if (productToAdd) {
+            let existingCartItem = cart.find(cartItem => cartItem.product.barcode === exampleBarcode2);
+            if (existingCartItem) {
+                existingCartItem.quantity += 1;
+            } else {
+                cart.push({product: productToAdd2, quantity: 1});
+            }
+            console.log('Current cart:', cart);
+
+            // Update the cart view
+            updateCartView();
+        } else {
+            console.log('Example product not found for barcode:', exampleBarcode2);
+        }
+
+    });
+
+    document.addEventListener('keydown', function (e) {
+        // ... [your existing code for barcode detection]
+        const key = e.key; // tuş basımını al
+        const currentTime = new Date().getTime(); // şu anki zamanı al
+
+        if (currentTime - lastKeypressTime > 100) {
+            // eğer son tuş basımı ile şu anki zaman arasında 100ms'den fazla varsa
+            // toplama buffer'ını sıfırla
+            accumulatedKeys = "";
+        }
+
+        // tuş basımını toplama buffer'ına ekle
+        accumulatedKeys += key;
+
+        // zaman damgasını güncelle
+        lastKeypressTime = currentTime;
+
+        if (accumulatedKeys.length === 13) {
+            let productToAdd = products.find(product => product.barcode === accumulatedKeys);
+
+            if (productToAdd) {
+                let existingCartItem = cart.find(cartItem => cartItem.product.barcode === accumulatedKeys);
+                if (existingCartItem) {
+                    existingCartItem.quantity += 1;
+                } else {
+                    cart.push({product: productToAdd, quantity: 1});
+                }
+                console.log('Current cart:', cart);
+
+                // Update the cart view
+                updateCartView();
+            } else {
+                console.log('Product not found for barcode:', accumulatedKeys);
+            }
+            accumulatedKeys = "";
+        }
+    });
+
+    function updateCartView() {
+        // Getting the cart element from the DOM
+        const cartElement = document.getElementById('cart');
+
+        // Cleaning previous cart view
+        cartElement.innerHTML = '';
+
+        // Iterate over the cart items
+        cart.forEach(cartItem => {
+            // Ensure the product and its properties are defined
+            if (cartItem.product && typeof cartItem.product.name !== 'undefined' && typeof cartItem.product.price !== 'undefined') {
+                const itemElement = document.createElement('div');
+                let productImageHTML = '';
+                if (cartItem.product.imagePath && cartItem.product.imagePath.length > 0) {
+                    productImageHTML = `<img src="${cartItem.product.imagePath}" alt="${cartItem.product.name}" width="100" class="mb-2">`;
+                }
+
+                itemElement.classList.add('row', 'mb-4', 'd-flex', 'justify-content-between', 'align-items-center');
+                itemElement.innerHTML = `
+               <hr class="my-4">
+
+                  <div class="col-md-2 col-lg-2 col-xl-2">
+                                ${productImageHTML}
+                            </div>
+                <div class="col-md-3 col-lg-3 col-xl-3">
+                    <h6 class="text-black mb-0">${cartItem.product.name}</h6>
+                </div>
+                <div class="col-md-3 col-lg-3 col-xl-3 d-flex">
+                    <button class="btn btn-link px-2" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input min="0" name="quantity" value="${cartItem.quantity}" type="number" class="form-control form-control-sm">
+                    <button class="btn btn-link px-2" onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="col-md-2 col-lg-2 col-xl-2 offset-lg-1">
+                    <h6 class="mb-0">${cartItem.product.price} ₺</h6>
+                </div>
+                <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                    <a href="#!" class="text-muted"><i class="fas fa-times"></i></a>
+                </div>
+            `;
+
+
+                const removeIcon = itemElement.querySelector('.fa-times');
+                // Tıklanıldığında ürünü cart dizisinden kaldıran bir olay dinleyici ekleyin.
+                removeIcon.addEventListener('click', function () {
+                    removeFromCart(cartItem.product.barcode);
+                    updateCartView();
+                });
+
+
+                // Arttırma ve azaltma simgelerini bul.
+                const increaseIcon = itemElement.querySelector('.fa-plus');
+                const decreaseIcon = itemElement.querySelector('.fa-minus');
+                const quantityInput = itemElement.querySelector('input[name="quantity"]');
+
+                // Arttırma simgesine tıklanıldığında miktarı arttır.
+                increaseIcon.addEventListener('click', function () {
+                    const newQuantity = parseInt(quantityInput.value, 10) + 1;
+                    updateCartQuantity(cartItem.product.barcode, newQuantity);
+                    updateCartView();
+                });
+
+                // Azaltma simgesine tıklanıldığında miktarı azalt.
+                decreaseIcon.addEventListener('click', function () {
+                    const newQuantity = parseInt(quantityInput.value, 10) - 1;
+                    if (newQuantity > 0) {
+                        updateCartQuantity(cartItem.product.barcode, newQuantity);
+                        updateCartView();
+                    }
+                });
+
+
+                cartElement.appendChild(itemElement);
+            } else {
+                console.error("A product or its properties are undefined:", cartItem);
+            }
+        });
+
+        // Update the total price in the summary
+        const totalPrice = cart.reduce((total, cartItem) => {
+            return total + (cartItem.product.price * cartItem.quantity);
+        }, 0);
+        // Ensure the price element is defined and display the total price
+        const priceElement = document.querySelector('.total-price');
+        if (priceElement) {
+            priceElement.textContent = `${totalPrice} ₺`;
+        } else {
+            console.error("Price element not found in the DOM.");
+        }
+        updateSummary();
+    }
+
+    function updateSummary() {
+        // Sepetteki toplam miktar ve fiyatı hesapla
+        let totalQuantity = 0;
+        let totalPrice = 0;
+
+        cart.forEach(cartItem => {
+            if (typeof cartItem.product.price === 'number' && typeof cartItem.quantity === 'number') {
+                totalQuantity += cartItem.quantity;
+                totalPrice += cartItem.product.price * cartItem.quantity;
+            } else {
+                console.error('Invalid price or quantity:', cartItem);
+            }
+        });
+
+        // Eğer totalQuantity veya totalPrice sayı değilse, loglama yap
+        if (isNaN(totalQuantity) || isNaN(totalPrice)) {
+            console.error('Total quantity', {totalQuantity, totalPrice, cart});
+            return; // Eğer hatalı bir durum varsa, fonksiyonu burada bitir
+        }
+
+        // Toplam miktar ve fiyatı ekranda güncelle
+        const summaryElement = document.querySelector('.total-price'); // Sizin HTML yapınıza uygun bir selector olmalı
+        if (summaryElement) {
+            summaryElement.textContent = `Toplam Adet: ${totalQuantity}, Toplam Fiyat: ${totalPrice} ₺`;
+        } else {
+            console.error('Summary element not found in the DOM');
+        }
+    }
+
+    function placeOrder() {
+        var token = localStorage.getItem("jwt"); // JWT token'ınızın ismi neyse ona göre değiştirin.
+
+        fetch('/api/v1/basket', {  // Endpoint'in doğru olduğundan emin olun.
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(cart)  // Cart'ı JSON formatına çevirip gönderiyoruz.
+        })
+            .then(response => {
+                // Eğer cevap başarılı bir HTTP kodu içeriyorsa (örn: 200-299 arası)
+                if (response.ok) {
+                    return response.json();  // JSON'a dönüştür ve sonraki then bloğuna geçir.
+                } else {
+                    return response.json().then(data => {  // Hatalı cevabı JSON olarak dön ve hata fırlat
+                        throw new Error(data.message || 'Bir hata oluştu');
+                    });
+                }
+            })
+            .then(data => {
+                if (data.data) {
+                    alert(data.message);
+                    resetUI();
+                    updateSummary();
+                }
+            })
+            .catch(error => {
+                // catch bloğunda, özel olarak oluşturduğumuz hatalar ve diğer potansiyel hatalar yakalanır.
+                alert(error.message);  // Doğru kullanım// Kullanıcıya hata mesajını göster
+                console.error('Hata:', error);
+            });
+    }
+
+    function resetUI() {
+        // 1. Sepeti temizle
+        cart = [];
+
+        // 2. UI'de sepeti gösteren bölümü temizle veya varsayılan bir duruma getir.
+        let cartElement = document.querySelector('#cart');
+        if (cartElement) {
+            cartElement.innerHTML = ""; // veya default bir mesaj ekleyebilirsiniz: "Sepetiniz boş."
+        }
+
+        // 3. Toplam fiyat veya benzeri gösterimleri sıfırla.
+        let totalPriceElement = document.querySelector('.total-price');
+        if (totalPriceElement) {
+            totalPriceElement.textContent = "0.00 ₺";
+        }
+        updateSummary()
+        // Diğer UI temizlemeleri için benzer adımlar ekleyebilirsiniz.
+    }
+
+    function removeFromCart(barcode) {
+        // Verilen barkod değerine sahip ürünü cart dizisinden kaldır.
+        cart = cart.filter(cartItem => cartItem.product.barcode !== barcode);
+    }
+
+    function updateCartQuantity(barcode, newQuantity) {
+        // Verilen barkod değerine sahip ürünün miktarını güncelle.
+        const itemToUpdate = cart.find(cartItem => cartItem.product.barcode === barcode);
+        if (itemToUpdate) {
+            itemToUpdate.quantity = newQuantity;
+        }
+    }
+
+</script>
+
+
+<footer th:insert="common/template :: footer"></footer>
+</body>
+</html>

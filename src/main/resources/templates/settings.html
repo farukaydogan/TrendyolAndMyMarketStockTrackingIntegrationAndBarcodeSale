@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <!-- Head -->
+    <th:block th:replace="~{common/template :: common-head(title='Home')}"/>
+</head>
+
+
+<body>
+<nav th:insert="common/template :: navbar">
+    <!-- Navbar content from fragments will be inserted here -->
+</nav>
+<div class="container">
+    <div class="container-fluid px-1 py-5 mx-auto">
+        <div class="row d-flex justify-content-center">
+            <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
+                <h3>Ayarlar Ayd Sistemleri</h3>
+                <!--                <p class="blue-text">Just answer a few questions<br> so that we can personalize the right experience for you.</p>-->
+                <div class="card">
+                    <h5 class="text-center mb-4"></h5>
+                    <form class="form-card" action="/settings" method="post">
+
+
+                        <button type="button" class="btn btn-success btn-lg btn-block w-100 mb-4 "
+                                data-mdb-ripple-color="dark" onclick="getTrendyolProducts()">Trendyoldan Ürünlerimi Çek
+                        </button>
+
+
+
+                <!--                        TODO BU FORM MUTLAKA XHR ILE YAPILACAKTIR FORM-URLENCODED ILE POST ATMAYACAGIZ-->
+                        <div class="row justify-content-between text-left">
+                            <div class="form-group col-sm-12 flex-column d-flex"><label class="form-control-label px-3">Trendyol
+                                Api Key<span class="text-danger"> *</span></label> <input type="text" id="trendyolApiKey"
+                                                                                          th:value="${settings.getTrendyolApiKey()}"            name="trendyolApiKey" placeholder=""></div>
+                            <!--                            <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Barkod<span class="text-danger"> *</span></label> <input type="text" id="lname" name="lname" placeholder="Enter your last name" onblur="validate(2)"> </div>-->
+                        </div>
+
+                        <div class="row justify-content-between text-left">
+                            <div class="form-group col-sm-12 flex-column d-flex"><label class="form-control-label px-3">Trendyol
+                                Api Key<span class="text-danger"> *</span></label> <input type="text" id="trendyolUserId"
+                                                                                          th:value="${settings.getTrendyolUserId()}"            name="trendyolUserId" placeholder=""></div>
+                            <!--                            <div class="form-group col-sm-6 flex-column d-flex"> <label class="form-control-label px-3">Barkod<span class="text-danger"> *</span></label> <input type="text" id="lname" name="lname" placeholder="Enter your last name" onblur="validate(2)"> </div>-->
+                        </div>
+                        <div class="row justify-content-between text-left">
+                            <div class="form-group col-sm-12 flex-column d-flex"><label class="form-control-label px-3">Isim<span
+                                    class="text-danger"> *</span></label> <input type="text" id="nameSurname" name="firstname" th:value="${user.getFirstname()}" >
+                            </div>
+                        </div>
+                        <div class="row justify-content-between text-left">
+                            <div class="form-group col-sm-12 flex-column d-flex"><label class="form-control-label px-3">Email<span
+                                    class="text-danger"> *</span></label> <input type="text" id="email"  th:value="${user.getEmail()}"
+                                                                                 name="email">
+                            </div>
+                            <!--                            <div class="form-group col-sm- flex-column d-flex"> <label class="form-control-label px-3"><span class="text-danger"> *</span></label> <input type="text" id="mob" name="mob" placeholder="" onblur="validate(4)"> </div>-->
+                        </div>
+
+                        <div class="row justify-content-between text-left">
+                            <div class="form-group col-sm-12 flex-column d-flex"><label class="form-control-label px-3" >Sifre<span
+                                    class="text-danger"> *</span></label> <input type="password"  id="password" name="password">
+                            </div>
+                        </div>
+<!--                        TODO burada user trendyol id ve cekme islemini baslat kolonu olacaktir -->
+
+                        <div class="row justify-content-end">
+                            <div class="form-group col-sm-12 mt-4">
+                                <button type="submit" class="btn-block btn-primary">Güncelle</button>
+                            </div>
+                        </div>
+
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/template :: common-scripts}"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('.form-card');
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // Formun normal submit işlemi engellenir.
+            updateSettings();
+        });
+    });
+
+    function updateSettings() {
+        const token = localStorage.getItem("jwt");
+        const trendyolApiKey = document.getElementById('trendyolApiKey').value;
+        const trendyolUserId = document.getElementById('trendyolUserId').value;
+        const nameSurname = document.getElementById('nameSurname').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        const formData = {
+            trendyolApiKey,
+            trendyolUserId,
+            nameSurname,
+            email,
+            password
+            // Diğer form elemanları da buraya eklenmeli
+        };
+
+        fetch('/api/v1/settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                    if (data.success) { // Eğer API başarılı bir yanıt verirse
+                        alert(data.message);
+                        location.reload(); // Sayfayı yeniden yükle
+                    } else {
+                        throw new Error(data.message || 'Bir hata oluştu');
+                    }
+            })
+            .catch((error) => {
+                console.error('Hata:', error);
+            });
+    }
+
+    function getTrendyolProducts(productId) {
+        var token = localStorage.getItem("jwt"); // JWT token'ınızın ismi neyse ona göre değiştirin.
+
+        if (confirm('Bu ürünleri Trendyoldan çekmek istediğinize emin misiniz?')) {
+            fetch(`/api/v1/trendyol/get-all-product-quantity`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token, // JWT tokeninizi buraya ekleyin
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+
+                    alert('Ürünler başarıyla çekildi.');
+                    location.reload(); // Sayfayı yeniden yükle
+                })
+
+                .catch(error => {
+                    console.error('Hata:', error);
+                });
+        }
+    }
+</script>
+
+<footer th:insert="common/template :: footer"></footer>
+</body>
+</html>

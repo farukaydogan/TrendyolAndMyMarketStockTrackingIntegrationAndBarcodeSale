@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Panel - Users</title>
+</head>
+<body>
+<h1>User List</h1>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <!-- Diğer kolonlar -->
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.email}"></td>
+        <td><a th:href="@{/management/add-stock/{id}(id=${user.id})}">Add Stock</a></td>
+
+        <!-- Diğer kolonlar -->
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

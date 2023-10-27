@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <!-- Head -->
+    <th:block th:replace="~{common/template :: common-head(title='Home')}"/>
+</head>
+
+
+<body>
+<nav th:insert="common/template :: navbar">
+    <!-- Navbar content from fragments will be inserted here -->
+</nav>
+
+<div class="container">
+    <table class="table align-middle mb-0 bg-white">
+        <thead class="bg-light">
+        <tr>
+            <th>Ürün fotografı</th>
+            <th>Isim</th>
+            <th>Lot Numarası</th>
+            <th>Fiyat</th>
+            <th>Stok adedı</th>
+            <th>Renk</th>
+            <th>Barkod</th>
+            <th>Islem Yap</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products}">
+            <form th:attr="id='productForm-' + ${product.productId}">
+
+                <td>
+                    <input type="hidden"  th:if="${product.imagePath!=null}" th:value="${product.imagePath}" name="imagePath"  >
+
+                    <img th:if="${product.imagePath!=null}" th:src="${product.imagePath}"  width="100px"
+                          alt="}r"/>
+                </td>
+                <input type="hidden" name="productId" th:value="${product.productId}"/>
+                <td>
+                    <input type="text" name="name" th:value="${product.name}"/>
+                </td>
+                <td>
+                    <input type="text" name="lotNumber" th:value="${product.lotNumber}"/>
+                </td>
+                <td>
+                    <input type="text" name="price" th:value="${product.price}"/>
+                </td>
+                <td>
+                    <input type="text" name="stockQuantity" th:value="${product.stockQuantity}"/>
+                </td>
+                <td>
+                    <input type="text" name="colorCode" th:value="${product.colorCode}"/>
+                </td>
+                <td>
+                    <input type="text" name="barcode" th:value="${product.barcode}"/>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-rounded btn-warning w-100"
+                            data-th-attr=" onclick='updateProduct(\'' + ${product.productId} + '\')'">
+                        Düzenle
+                    </button>
+
+                    <button type="button" class="btn ml-auto btn-rounded btn-danger w-100" data-th-attr=" onclick='deleteProduct(\'' + ${product.productId} + '\')'">
+                    Sil
+                    </button>
+
+                </td>
+            </form>
+
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:replace="~{common/template :: common-scripts}"></div>
+
+<script>
+
+    function deleteProduct(productId) {
+        var token = localStorage.getItem("jwt"); // JWT token'ınızın ismi neyse ona göre değiştirin.
+
+        if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) {
+            fetch(`/api/v1/product/${productId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token, // JWT tokeninizi buraya ekleyin
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) { // Eğer API başarılı bir yanıt verirse
+                        alert('Ürün başarıyla silindi.');
+                        location.reload(); // Sayfayı yeniden yükle
+                    } else {
+                        alert('Bir hata oluştu: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Hata:', error);
+                });
+        }
+    }
+    function updateProduct(productId) {
+        var formElement = document.getElementById("productForm-" + productId);
+
+        if (!formElement) {
+            console.error("Form not found for productId:", productId);
+            return;
+        }
+
+        var formData = new FormData(formElement);
+
+        var productData = {};
+        formData.forEach((value, key) => {
+            productData[key] = value;
+        });
+
+
+        var token = localStorage.getItem("jwt"); // JWT token'ınızın ismi neyse ona göre değiştirin.
+
+        fetch('/api/v1/product/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify(productData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert('Basariyla guncellendi.');
+                location.reload(); // Sayfayı yeniden yükle
+                // İstediğiniz başka işlemler (örn. başarılı mesajı göstermek) burada yapılabilir.
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+</script>
+</body>
+
+<!--<footer th:insert="common/template :: footer"></footer>-->
+
+</html>
