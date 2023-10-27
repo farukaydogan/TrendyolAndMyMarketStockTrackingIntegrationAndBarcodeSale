@@ -29,7 +29,7 @@ This project is designed to integrate with the Trendyol API to fetch orders and 
 
 1. Clone the repository:
    ```bash
-    [git clone](https://github.com/farukaydogan/TrendyolAndMyMarketStockTrackingIntegrationAndBarcodeSale.git)
+ https://github.com/farukaydogan/TrendyolAndMyMarketStockTrackingIntegrationAndBarcodeSale.git
 
 
    Navigate to the project directory:
